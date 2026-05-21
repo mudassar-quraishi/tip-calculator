@@ -1,45 +1,132 @@
-Frontend Assessment — Tip Calculator — ANSWERS
+# Frontend Assessment — Tip Calculator — ANSWERS
 
-1) How to run
+## 1) How to run
 
-- Clone the repo and run:
+### Requirements
+- Node.js 18+
+- npm
+
+### Run locally
+
+Clone the repository and install dependencies:
 
 ```bash
 npm install
 npm run dev
 ```
 
-- Open the URL printed by Vite (typically http://localhost:5173/).
+After starting the dev server, open the URL shown in the terminal (usually `http://localhost:5173/`).
 
-2) Stack & design choices
+---
 
-- Stack: React + Vite. Chosen because it's fast to scaffold, beginner-friendly JSX, and easy to run locally with `npm run dev`.
+## 2) Stack & design choices
 
-- Two visual/interaction decisions:
-  - Active tip selection: I show preset tip buttons and a separate `Custom` numeric input; clicking a preset clears the custom value so the active tip is always explicit (`src/App.jsx` tip selection section). This keeps intent clear and avoids ambiguity when both a preset and custom value exist.
-  - Results panel on the right: I used a two-column layout (`.layout`) so inputs take the larger left column and the live results sit in a compact right column. On small screens it collapses to a single column (CSS `@media` rules in `src/styles.css`). This keeps the live totals visible at a glance on wide screens while keeping inputs first on mobile.
+### Stack
 
-3) Responsive & accessibility
+I used React with Vite for this project.
 
-- Behavior: at 360px width the layout stacks vertically (inputs first, results below). At 1440px the layout uses a two-column grid with results fixed-width on the right for quick glanceability (`.layout` and `.results-panel` in `src/styles.css`).
+I picked it mainly because React makes handling live-updating UI straightforward, and Vite keeps the setup lightweight and fast to run locally. Since this app depends heavily on instant calculations and responsive input handling, React state management felt like a good fit.
 
-- Accessibility handled: all form controls have labels (`label` + `htmlFor`), custom tip input has `aria-label`, preset buttons are plain `<button type="button">` so keyboard users can tab and activate them. Focus styles are visible (input border on focus). Error messages are inline next to offending fields. Color choices aim for sufficient contrast between background and text.
+---
 
-- Accessibility skipped (known gap): I didn't add full screen-reader-only descriptions or ARIA live regions for result updates; in a follow-up I'd add `aria-live="polite"` on the results panel so screen readers announce changes.
+### Design / interaction decisions
 
-4) AI usage
+#### Active tip selection
 
-- I used an AI coding assistant to help repair and scaffold files: to reconstruct a truncated `src/App.jsx`, to add `vite.config.js` and `index.html`, and to suggest CSS. For each use I provided prompts describing the needed behavior; the assistant produced code which I then reviewed and edited for clarity.
+I used preset tip buttons along with a separate custom tip input.
 
-- One specific change to AI output: the assistant suggested base CSS that began with a malformed top-level block. I replaced that with a small reset plus `body` styles and explicit `.layout`/`.card` rules so the project is easier for beginners to read and the layout is responsive.
+If the user selects a preset tip, the custom value gets cleared automatically so there’s never confusion about which tip value is currently active. I wanted the active state to always feel obvious instead of having both preset and custom values competing with each other.
 
-5) Honest gap
+This logic is handled in the tip selection section inside `src/App.jsx`.
 
-- One area not polished: no automated tests and no deploy setup. With another day I'd add simple unit tests (Jest + React Testing Library) for the calculation logic and add a GitHub Actions workflow that builds and deploys to GitHub Pages or Netlify.
+---
 
+#### Split layout for inputs and results
 
-Rounding policy
+On larger screens, the app uses a two-column layout where the form stays on the left and the live calculation panel stays visible on the right.
 
-- Policy: Round up per-person to the nearest cent so the group never underpays. Implementation: the per-person value is calculated as `Math.ceil((total / people) * 100) / 100` and shown with two decimals.
+I chose this because users can immediately see totals update while typing without needing to scroll or shift focus. On smaller screens the layout collapses into a single column so the input flow stays comfortable on mobile devices.
 
-- Rationale: This is simple to implement and avoids the scenario where rounding causes the group to pay less than the true total. The minor overpayment is acceptable for most casual splits. If precise splitting were required, I'd implement distributing the leftover cents across people.
+This is handled through the `.layout` media queries in `src/styles.css`.
+
+---
+
+## 3) Responsive & accessibility
+
+### Responsive behavior
+
+On smaller screens (around 360px wide), the layout stacks vertically with the inputs appearing first and the results section below them. Buttons and inputs resize naturally to avoid horizontal scrolling.
+
+On larger screens (around 1440px wide), the app switches to a two-column layout so both the calculator and results stay visible at the same time.
+
+---
+
+### Accessibility considerations
+
+I added proper labels for all form inputs using `label` and `htmlFor`.
+
+The custom tip field includes an `aria-label`, and the preset tip options are regular `<button type="button">` elements so keyboard users can tab through and activate them normally.
+
+I also added visible focus styles and kept the text/background contrast reasonably high for readability.
+
+Validation errors appear inline near the related field instead of using alerts or browser tooltips.
+
+I also made sure validation messages only appear after interaction and disappear immediately once the input becomes valid so the UI doesn’t feel jumpy while typing.
+
+---
+
+### Known accessibility gap
+
+One thing I didn’t fully implement was screen-reader announcements for changing totals.
+
+With more time, I would add something like `aria-live="polite"` to the results section so updates are announced automatically for screen reader users.
+
+---
+
+## 4) AI usage
+
+I used ChatGPT as a coding assistant during development.
+
+Mainly, I used it for:
+- rebuilding a partially broken `src/App.jsx`
+- scaffolding missing Vite files like `vite.config.js` and `index.html`
+- generating an initial CSS structure
+- reviewing validation edge cases
+
+I didn’t directly copy everything as-is. I reviewed and adjusted the generated code before using it.
+
+One specific change I made was replacing the original AI-generated layout CSS. The initial version used a more rigid structure that didn’t adapt well on smaller screens. I rewrote it using a simpler responsive grid and clearer `.layout` / `.card` sections so the code was easier to maintain and behaved better on mobile devices.
+
+I also adjusted the validation behavior because the initial implementation showed errors too aggressively while typing.
+
+---
+
+## 5) Honest gap
+
+One thing I’d improve with more time is the overall polish of the experience.
+
+Right now the app works well for the main use cases, but there are still smaller details I’d like to refine — especially around edge-case handling and overall smoothness.
+
+For example:
+- adding automated tests for calculations and validation
+- improving formatting for very large numbers
+- adding subtle transitions/animations to make state changes feel smoother
+- polishing mobile spacing a bit more on very small screens
+
+I’d also like to deploy it properly with a production-ready setup instead of keeping it only as a local development project.
+
+---
+
+# Rounding policy
+
+For per-person calculations, I decided to round up to the nearest cent using:
+
+```js
+Math.ceil((total / people) * 100) / 100
+```
+
+I chose this approach so the group never ends up underpaying because of rounding issues.
+
+It does slightly overcharge by a cent in some cases, but I felt that was a better tradeoff than accidentally displaying a total that’s lower than the actual amount owed.
+
+If this were a production finance app, I’d probably distribute leftover cents more precisely across users instead.
